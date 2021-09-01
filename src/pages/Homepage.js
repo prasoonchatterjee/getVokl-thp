@@ -1,9 +1,11 @@
 import React from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Homepage() {
+  const { logout } = useAuth();
   return (
     <div>
-      <p>homepage</p>
+      <button onClick={logout}>Log out</button>
     </div>
   );
 }

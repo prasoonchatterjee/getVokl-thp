@@ -7,6 +7,8 @@ import Homepage from "./pages/Homepage";
 import Profile from "./pages/Profile";
 import FirebaseContext from "./context/FirebaseContext";
 import AuthContext from "./context/AuthContext";
+import ProtectedRoutes from "./helpers/ProtectedRoutes";
+
 function App() {
   return (
     <div className="App">
@@ -14,10 +16,10 @@ function App() {
         <AuthContext>
           <BrowserRouter>
             <Switch>
-              <Route exact path="/" component={Homepage} />
+              <ProtectedRoutes exact path="/" component={Homepage} />
               <Route exact path="/login" component={Login} />
               <Route exact path="/signup" component={Signup} />
-              <Route exact path="/profile" component={Profile} />
+              <ProtectedRoutes exact path="/profile" component={Profile} />
             </Switch>
           </BrowserRouter>
         </AuthContext>
