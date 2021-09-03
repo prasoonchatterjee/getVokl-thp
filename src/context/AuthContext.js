@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import firebase from "../lib/firebase";
+import FirebaseContext from "./FirebaseContext";
 
 const AuthContext = React.createContext();
 
@@ -12,6 +12,7 @@ export default function AuthProvider({ children }) {
   const [firestoreUser, setFirestoreUser] = useState();
   const [loading, setLoading] = useState(true);
 
+  const { firebase, FieldValue } = useContext(FirebaseContext);
   function login(email, password) {
     return firebase.auth().signInWithEmailAndPassword(email, password);
   }
@@ -25,7 +26,11 @@ export default function AuthProvider({ children }) {
       .firestore()
       .collection("users")
       .doc(id)
-      .set({ displayName: name, email: email });
+      .set({
+        displayName: name,
+        email: email,
+        createdAt: FieldValue.serverTimestamp(),
+      });
   }
 
   async function signup(name, email, password) {

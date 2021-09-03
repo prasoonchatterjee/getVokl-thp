@@ -9,14 +9,10 @@ export default function ChannelContainer() {
   const [channels, setChannels] = useState([]);
 
   const { authenticatedUser } = useAuth();
-  const firebase = useContext(FirebaseContext);
+  const { firebase, FieldValue } = useContext(FirebaseContext);
   const { setChannelSelected } = useContext(ChannelContext);
 
-  useEffect(() => {
-    if (channels.length > 0) {
-      setChannelSelected(channels[0].docId);
-    }
-  }, [channels]);
+  //create new channel
   function handleSubmit() {
     firebase
       .firestore()
@@ -28,22 +24,38 @@ export default function ChannelContainer() {
           displayName: authenticatedUser.displayName,
           id: authenticatedUser.uid,
         },
+        createdAt: FieldValue.serverTimestamp(),
+        accessMembers: [authenticatedUser.uid],
+      })
+      .then((response) => {
+        setChannelName("");
+        setChannelDetails("");
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }
 
+  //pull all the channels and listen for additions and select one as well
   useEffect(() => {
     const unsubscribe = firebase
       .firestore()
       .collection("channels")
+      .where("accessMembers", "array-contains", authenticatedUser.uid)
       .onSnapshot((snapshot) => {
         const changes = snapshot.docChanges();
-        console.log(`snapshot`, snapshot);
-        console.log(`changes`, changes);
-        const channelsArray = changes.map((item) => ({
-          ...item.doc.data(),
-          docId: item.doc.id,
-        }));
-        setChannels(channelsArray);
+        const filteredChanges = changes.filter((item) => item.type === "added");
+        if (filteredChanges.length > 0) {
+          const newChanges = filteredChanges.map((item) => ({
+            ...item.doc.data(),
+            docId: item.doc.id,
+          }));
+          setChannels((prevState) => {
+            return [...prevState, ...newChanges];
+          });
+          console.log(`newChanges`, newChanges);
+          setChannelSelected(newChanges[0].docId);
+        }
       });
 
     return unsubscribe;
@@ -64,14 +76,15 @@ export default function ChannelContainer() {
       />
       <button onClick={handleSubmit}>Add channel</button>
 
-      {channels.map((channel) => (
-        <p
-          key={channel.docId}
-          onClick={() => setChannelSelected(channel.docId)}
-        >
-          {channel.name}
-        </p>
-      ))}
+      {channels.length > 0 &&
+        channels.map((channel) => (
+          <p
+            key={channel.docId}
+            onClick={() => setChannelSelected(channel.docId)}
+          >
+            {channel.name}
+          </p>
+        ))}
     </div>
   );
 }

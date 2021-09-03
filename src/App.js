@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
-import firebase from "./lib/firebase";
+import { firebase, FieldValue } from "./lib/firebase";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Homepage from "./pages/Homepage";
@@ -12,7 +12,7 @@ import ProtectedRoutes from "./helpers/ProtectedRoutes";
 function App() {
   return (
     <div className="App">
-      <FirebaseContext.Provider value={firebase}>
+      <FirebaseContext.Provider value={{ firebase, FieldValue }}>
         <AuthContext>
           <BrowserRouter>
             <Switch>
