@@ -11,20 +11,18 @@ import ProtectedRoutes from "./helpers/ProtectedRoutes";
 
 function App() {
   return (
-    <div className="App">
-      <FirebaseContext.Provider value={{ firebase, FieldValue }}>
-        <AuthContext>
-          <BrowserRouter>
-            <Switch>
-              <ProtectedRoutes exact path="/" component={Homepage} />
-              <Route exact path="/login" component={Login} />
-              <Route exact path="/signup" component={Signup} />
-              <ProtectedRoutes exact path="/profile" component={Profile} />
-            </Switch>
-          </BrowserRouter>
-        </AuthContext>
-      </FirebaseContext.Provider>
-    </div>
+    <FirebaseContext.Provider value={{ firebase, FieldValue }}>
+      <AuthContext>
+        <BrowserRouter>
+          <Switch>
+            <ProtectedRoutes exact path="/" component={Homepage} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/signup" component={Signup} />
+            <ProtectedRoutes exact path="/profile" component={Profile} />
+          </Switch>
+        </BrowserRouter>
+      </AuthContext>
+    </FirebaseContext.Provider>
   );
 }
 
