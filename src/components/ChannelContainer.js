@@ -4,37 +4,11 @@ import ChannelContext from "../context/ChannelContext";
 import FirebaseContext from "../context/FirebaseContext";
 
 export default function ChannelContainer() {
-  const [channelName, setChannelName] = useState("");
-  const [channelDetails, setChannelDetails] = useState("");
   const [channels, setChannels] = useState([]);
 
   const { authenticatedUser } = useAuth();
   const { firebase, FieldValue } = useContext(FirebaseContext);
-  const { setChannelSelected } = useContext(ChannelContext);
-
-  //create new channel
-  function handleSubmit() {
-    firebase
-      .firestore()
-      .collection("channels")
-      .add({
-        name: channelName,
-        details: channelDetails,
-        createdBy: {
-          displayName: authenticatedUser.displayName,
-          id: authenticatedUser.uid,
-        },
-        createdAt: FieldValue.serverTimestamp(),
-        accessMembers: [authenticatedUser.uid],
-      })
-      .then((response) => {
-        setChannelName("");
-        setChannelDetails("");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+  const { setChannelSelected, channelSelected } = useContext(ChannelContext);
 
   //pull all the channels and listen for additions and select one as well
   useEffect(() => {
@@ -53,7 +27,6 @@ export default function ChannelContainer() {
           setChannels((prevState) => {
             return [...prevState, ...newChanges];
           });
-          console.log(`newChanges`, newChanges);
           setChannelSelected(newChanges[0].docId);
         }
       });
@@ -61,28 +34,23 @@ export default function ChannelContainer() {
     return unsubscribe;
   }, []);
 
+  function selectedChannel(docId) {
+    if (docId === channelSelected) return "bg-purple-900";
+    else return;
+  }
   return (
-    <div>
-      <p>ChannelContainer</p>
-      <input
-        placeholder="channel name"
-        value={channelName}
-        onChange={(e) => setChannelName(e.target.value)}
-      />
-      <input
-        placeholder="about channel"
-        value={channelDetails}
-        onChange={(e) => setChannelDetails(e.target.value)}
-      />
-      <button onClick={handleSubmit}>Add channel</button>
-
+    <div className="w-1/4 bg-indigo-600 overflow-auto">
+      <p className="text-white font-extrabold text-center">Channels</p>
       {channels.length > 0 &&
         channels.map((channel) => (
           <p
             key={channel.docId}
             onClick={() => setChannelSelected(channel.docId)}
+            className={`text-white p-2 m-2 rounded ${selectedChannel(
+              channel.docId
+            )}`}
           >
-            {channel.name}
+            # {channel.name}
           </p>
         ))}
     </div>

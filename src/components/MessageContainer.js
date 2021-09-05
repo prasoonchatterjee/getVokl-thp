@@ -59,19 +59,39 @@ export default function MessageContainer() {
       return unsubscribe;
     }
   }, [channelSelected]);
+
+  function styleMessage(message) {
+    if (message.createdBy.uid === authenticatedUser.uid) {
+      return `bg-blue-200 self-end`;
+    } else return `bg-red-200 self-start`;
+  }
   return (
-    <div>
-      <p>MessageContainer</p>
-      <input
-        placeholder="write your message"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <button onClick={handleClick}>Send</button>
-      {channelMessages.length > 0 &&
-        channelMessages.map((message) => (
-          <p key={message.docId}>{message.text}</p>
-        ))}
+    <div className="w-1/2  flex flex-col justify-end">
+      <div className="flex flex-col overflow-auto">
+        {channelMessages.length > 0 &&
+          channelMessages.map((message) => (
+            <p
+              key={message.docId}
+              className={`mt-2 p-1 px-3 mx-3  rounded ${styleMessage(message)}`}
+            >
+              {message.text}
+            </p>
+          ))}
+      </div>
+      <div className=" flex justify-between h-14 mt-3">
+        <input
+          placeholder="write your message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="flex-auto p-2 h-full"
+        />
+        <button
+          onClick={handleClick}
+          className="bg-green-500 rounded text-white font-bold w-28 h-full"
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 }
