@@ -78,7 +78,7 @@ export default function MessageContainer() {
             </p>
           ))}
       </div>
-      <div className=" flex justify-between h-14 mt-3">
+      <div className=" flex justify-between h-14 mt-3 mx-3">
         <input
           placeholder="write your message"
           value={message}

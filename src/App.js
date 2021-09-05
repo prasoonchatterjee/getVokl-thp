@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 import { firebase, FieldValue } from "./lib/firebase";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
@@ -16,9 +16,12 @@ function App() {
         <BrowserRouter>
           <Switch>
             <ProtectedRoutes exact path="/" component={Homepage} />
+            <ProtectedRoutes exact path="/profile" component={Profile} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
-            <ProtectedRoutes exact path="/profile" component={Profile} />
+            <Route>
+              <Redirect to="/login" />
+            </Route>
           </Switch>
         </BrowserRouter>
       </AuthContext>

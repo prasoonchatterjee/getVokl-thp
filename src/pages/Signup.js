@@ -23,6 +23,9 @@ export default function Signup() {
       setError(e.message);
     }
   }
+
+  const isInvalid = name === "" || email === "" || password === "";
+
   return (
     <div className="w-screen h-screen bg-gray-100 flex justify-center ">
       <div className="flex flex-col justify-center h-full max-w-md w-full m-auto">
@@ -50,8 +53,10 @@ export default function Signup() {
           />
           <button
             onClick={handleSubmit}
-            disabled={loading}
-            className="bg-blue-500 text-white w-full rounded h-8 font-bold"
+            disabled={loading || isInvalid}
+            className={`bg-blue-500 text-white w-full rounded h-8 font-bold ${
+              isInvalid && "opacity-50"
+            }`}
           >
             Sign up
           </button>

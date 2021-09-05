@@ -20,6 +20,7 @@ export default function Login() {
       setError(e.message);
     }
   }
+  const isInvalid = email === "" || password === "";
   return (
     <div className="w-screen h-screen bg-gray-100 flex justify-center ">
       <div className="flex flex-col justify-center h-full max-w-md w-full m-auto">
@@ -40,9 +41,11 @@ export default function Login() {
           />
 
           <button
-            className="bg-blue-500 text-white w-full rounded h-8 font-bold"
+            className={`bg-blue-500 text-white w-full rounded h-8 font-bold ${
+              isInvalid && "opacity-50"
+            }`}
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || isInvalid}
           >
             Login
           </button>

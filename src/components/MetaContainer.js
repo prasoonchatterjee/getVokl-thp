@@ -9,6 +9,7 @@ export default function MetaContainer() {
   const [selectedUser, setSelectedUser] = useState();
   const [channelName, setChannelName] = useState("");
   const [channelDetails, setChannelDetails] = useState("");
+  const [error, setError] = useState("");
 
   const { firebase, FieldValue } = useContext(FirebaseContext);
   const { channelSelected } = useContext(ChannelContext);
@@ -59,9 +60,11 @@ export default function MetaContainer() {
         setChannelDetails("");
       })
       .catch((err) => {
-        console.log(err);
+        setError(err.message);
       });
   }
+
+  const isInvalid = channelName === "" || channelDetails === "";
 
   return (
     <div className="w-1/4  flex flex-col bg-purple-400 justify-between p-2">
@@ -73,10 +76,7 @@ export default function MetaContainer() {
           </div>
         )}
         <div>
-          <button
-            onClick={logout}
-            className="bg-blue-500 text-white rounded font-bold h-8 w-32 m-2"
-          >
+          <button className="bg-blue-500 text-white rounded font-bold h-8 w-32 m-2">
             <Link to="/profile">Update Profile</Link>
           </button>
           <button
@@ -108,6 +108,7 @@ export default function MetaContainer() {
         </button>
       </div>
       <div className="flex flex-col items-center bg-gray-50 rounded p-4 mt-4">
+        <p className="mb-4 text-xs text-red-500">{error && error}</p>
         <input
           className="text-sm text-black w-full m-2 p-5 h-2  rounded"
           placeholder="channel name"
@@ -122,7 +123,10 @@ export default function MetaContainer() {
         />
         <button
           onClick={handleChannelCreate}
-          className="bg-blue-500 text-white w-full rounded h-8 font-bold"
+          className={`bg-blue-500 text-white w-full rounded h-8 font-bold ${
+            isInvalid && "opacity-50"
+          }`}
+          disabled={isInvalid}
         >
           Add channel
         </button>

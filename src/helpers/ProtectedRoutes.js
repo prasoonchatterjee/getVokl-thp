@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoutes({ component: Component, ...rest }) {
   const { authenticatedUser } = useAuth();
-
   return (
     <Route
       {...rest}

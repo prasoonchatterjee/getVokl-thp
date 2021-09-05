@@ -22,15 +22,11 @@ export default function AuthProvider({ children }) {
   }
 
   function addUserToFirestore(id, name, email) {
-    return firebase
-      .firestore()
-      .collection("users")
-      .doc(id)
-      .set({
-        displayName: name,
-        email: email,
-        createdAt: FieldValue.serverTimestamp(),
-      });
+    return firebase.firestore().collection("users").doc(id).set({
+      displayName: name,
+      email: email,
+      createdAt: FieldValue.serverTimestamp(),
+    });
   }
 
   async function signup(name, email, password) {
@@ -44,6 +40,7 @@ export default function AuthProvider({ children }) {
   async function updateAuthenticatedUser(name, email) {
     await firebase.auth().currentUser.updateProfile({ displayName: name });
     await firebase.auth().currentUser.updateEmail(email);
+    return firebase.auth().currentUser;
   }
 
   async function updateFirestoreUser(id, name, email) {
@@ -55,9 +52,21 @@ export default function AuthProvider({ children }) {
   }
 
   async function updateUser(name, email) {
-    await updateAuthenticatedUser(name, email);
-    const id = firebase.auth().currentUser.uid;
+    const updatedAuthUser = await updateAuthenticatedUser(name, email);
+    const id = updatedAuthUser.uid;
     await updateFirestoreUser(id, name, email);
+    getUserFromFirestore();
+  }
+
+  function getUserFromFirestore() {
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(authenticatedUser.uid)
+      .get()
+      .then((doc) => {
+        setFirestoreUser({ ...doc.data(), docId: doc.id });
+      });
   }
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
@@ -70,14 +79,7 @@ export default function AuthProvider({ children }) {
 
   useEffect(() => {
     if (authenticatedUser) {
-      firebase
-        .firestore()
-        .collection("users")
-        .doc(authenticatedUser.uid)
-        .get()
-        .then((doc) => {
-          setFirestoreUser({ ...doc.data(), docId: doc.id });
-        });
+      getUserFromFirestore();
     }
   }, [authenticatedUser]);
 
