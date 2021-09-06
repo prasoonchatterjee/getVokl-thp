@@ -8,17 +8,44 @@ export function useAuth() {
 }
 
 export default function AuthProvider({ children }) {
-  const [authenticatedUser, setAuthenticatedUser] = useState();
-  const [firestoreUser, setFirestoreUser] = useState();
+  const [authenticatedUser, setAuthenticatedUser] = useState(null);
+  const [firestoreUser, setFirestoreUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const { firebase, FieldValue } = useContext(FirebaseContext);
+
   function login(email, password) {
     return firebase.auth().signInWithEmailAndPassword(email, password);
   }
 
   function logout() {
+    setFirestoreUser(null);
     return firebase.auth().signOut();
+  }
+
+  async function updateFirestoreUser(id, name, email) {
+    await firebase
+      .firestore()
+      .collection("users")
+      .doc(id)
+      .set({ displayName: name, email: email });
+  }
+
+  async function updateAuthenticatedUser(name, email) {
+    await firebase.auth().currentUser.updateProfile({ displayName: name });
+    await firebase.auth().currentUser.updateEmail(email);
+    return firebase.auth().currentUser;
+  }
+
+  function getUserFromFirestore() {
+    return firebase
+      .firestore()
+      .collection("users")
+      .doc(authenticatedUser.uid)
+      .get()
+      .then((doc) => {
+        setFirestoreUser({ ...doc.data(), docId: doc.id });
+      });
   }
 
   function addUserToFirestore(id, name, email) {
@@ -30,44 +57,24 @@ export default function AuthProvider({ children }) {
   }
 
   async function signup(name, email, password) {
-    const response = await firebase
+    return firebase
       .auth()
-      .createUserWithEmailAndPassword(email, password);
-    await firebase.auth().currentUser.updateProfile({ displayName: name });
-    await addUserToFirestore(response.user.uid, name, email);
-  }
-
-  async function updateAuthenticatedUser(name, email) {
-    await firebase.auth().currentUser.updateProfile({ displayName: name });
-    await firebase.auth().currentUser.updateEmail(email);
-    return firebase.auth().currentUser;
-  }
-
-  async function updateFirestoreUser(id, name, email) {
-    const response = await firebase
-      .firestore()
-      .collection("users")
-      .doc(id)
-      .set({ displayName: name, email: email });
+      .createUserWithEmailAndPassword(email, password)
+      .then((response) => {
+        console.log(`response`, response);
+        addUserToFirestore(response.user.uid, name, email);
+      })
+      .then((response) => {
+        firebase.auth().currentUser.updateProfile({ displayName: name });
+      });
   }
 
   async function updateUser(name, email) {
-    const updatedAuthUser = await updateAuthenticatedUser(name, email);
-    const id = updatedAuthUser.uid;
-    await updateFirestoreUser(id, name, email);
+    await updateAuthenticatedUser(name, email);
+    await updateFirestoreUser(authenticatedUser.uid, name, email);
     getUserFromFirestore();
   }
 
-  function getUserFromFirestore() {
-    firebase
-      .firestore()
-      .collection("users")
-      .doc(authenticatedUser.uid)
-      .get()
-      .then((doc) => {
-        setFirestoreUser({ ...doc.data(), docId: doc.id });
-      });
-  }
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       setAuthenticatedUser(user);

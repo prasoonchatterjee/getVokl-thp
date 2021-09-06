@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import ChannelContext from "../context/ChannelContext";
 import FirebaseContext from "../context/FirebaseContext";
@@ -9,8 +9,10 @@ export default function MessageContainer() {
   const { channelSelected } = useContext(ChannelContext);
   const { firebase, FieldValue } = useContext(FirebaseContext);
   const { authenticatedUser } = useAuth();
+  const dummy = useRef();
 
-  function handleClick() {
+  function handleClick(e) {
+    e.preventDefault();
     firebase
       .firestore()
       .collection("messages")
@@ -25,6 +27,7 @@ export default function MessageContainer() {
       })
       .then((response) => {
         setMessage("");
+        dummy.current.scrollIntoView({ behavior: "smooth" });
       });
   }
 
@@ -65,6 +68,9 @@ export default function MessageContainer() {
       return `bg-blue-200 self-end`;
     } else return `bg-red-200 self-start`;
   }
+
+  const isInvalid = message === "";
+
   return (
     <div className="w-1/2  flex flex-col justify-end">
       <div className="flex flex-col overflow-auto">
@@ -77,21 +83,29 @@ export default function MessageContainer() {
               {message.text}
             </p>
           ))}
+        <div ref={dummy}></div>
       </div>
-      <div className=" flex justify-between h-14 mt-3 mx-3">
+      <form
+        className=" flex justify-between h-14 mt-3 mx-3"
+        onSubmit={handleClick}
+      >
         <input
           placeholder="write your message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           className="flex-auto p-2 h-full"
+          required
         />
         <button
-          onClick={handleClick}
-          className="bg-green-500 rounded text-white font-bold w-28 h-full"
+          // onClick={handleClick}
+          className={`bg-green-500 rounded text-white font-bold w-28 h-full ${
+            isInvalid && "opacity-50"
+          } `}
+          disabled={isInvalid}
         >
           Send
         </button>
-      </div>
+      </form>
     </div>
   );
 }

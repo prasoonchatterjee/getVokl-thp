@@ -23,6 +23,7 @@ export default function Profile() {
       await updateUser(name, email);
       setMessage("profile updated successfully");
       setLoading(false);
+      history.push("/");
     } catch (e) {
       setLoading(false);
       setMessage(e.message);

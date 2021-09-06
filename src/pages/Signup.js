@@ -20,6 +20,7 @@ export default function Signup() {
       history.push("/");
     } catch (e) {
       setLoading(false);
+      console.log(e);
       setError(e.message);
     }
   }

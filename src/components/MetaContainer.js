@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 export default function MetaContainer() {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState();
+  const [selectedUser, setSelectedUser] = useState("");
   const [channelName, setChannelName] = useState("");
   const [channelDetails, setChannelDetails] = useState("");
   const [error, setError] = useState("");
@@ -19,14 +19,20 @@ export default function MetaContainer() {
     firebase
       .firestore()
       .collection("users")
-      .get()
-      .then((response) => {
-        const finalUsers = response.docs.map((item) => ({
-          ...item.data(),
-          docId: item.id,
+      .onSnapshot((snapshot) => {
+        const changes = snapshot.docChanges();
+        const filteredChanges = changes.filter((item) => item.type === "added");
+        const newChanges = filteredChanges.map((item) => ({
+          ...item.doc.data(),
+          docId: item.doc.id,
         }));
-        setUsers(finalUsers);
-        setSelectedUser(authenticatedUser.uid);
+        setUsers((prevState) => {
+          if (prevState.length) {
+            return [...prevState, ...newChanges];
+          } else {
+            return [...newChanges];
+          }
+        });
       });
   }, []);
 
